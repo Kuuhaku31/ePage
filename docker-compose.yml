@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    container_name: image-gallery-app
+    ports:
+      - "13000:3000"
+    volumes:
+      # 目录挂载到容器中
+      - D:/html/res:/images
+      # 挂载当前目录下的 public 目录到容器中的 /app/public
+      - ./public:/app/public
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped

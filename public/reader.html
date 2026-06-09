@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>漫画阅读器</title>
+  <link rel="stylesheet" href="css/reader.css">
+</head>
+
+<body>
+  <!-- 头部导航栏 -->
+  <div class="header">
+    <div class="header-left">
+      <button class="back-btn" id="backBtn">← 返回</button>
+      <div class="title-info">
+        <h1 id="mangaTitle">漫画阅读器</h1>
+        <div class="page-info">
+          第 <span id="currentPageNum">1</span>-<span id="nextPageNum">2</span> 页 / 共 <span id="totalPages">0</span> 页
+        </div>
+      </div>
+    </div>
+    <div class="header-right">
+      <button class="header-btn" id="one_left" title="向左一页">
+        <span>《</span>
+        <span>左</span>
+      </button>
+      <button class="header-btn" id="one_right" title="向右一页">
+        <span>》</span>
+        <span>右</span>
+      </button>
+      <button class="header-btn" id="modeBtn" title="切换单页/双页模式 (M)">
+        <span id="modeIcon">📖</span>
+        <span id="modeLabel">双页</span>
+      </button>
+      <button class="header-btn" id="directionBtn" title="切换阅读方向 (R)">
+        <span id="directionIcon">📖</span>
+        <span id="directionLabel">从右向左</span>
+      </button>
+      <button class="header-btn" id="fullscreenBtn" title="全屏 (F)">⛶ 全屏</button>
+    </div>
+  </div>
+
+  <!-- 阅读区域 -->
+  <div class="reader-wrapper">
+    <button class="page-nav-btn prev" id="prevBtn" title="上一页 (← 或 A)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </button>
+
+    <div class="pages-container" id="pagesContainer">
+      <img id="rightPageImg" src="" alt="右页">
+      <img id="leftPageImg" src="" alt="左页">
+      <div class="page" id="leftPage">
+        <!-- <div class="page-number" id="leftPageNumber">1</div> -->
+      </div>
+      <div class="page" id="rightPage">
+        <!-- <div class="page-number" id="rightPageNumber">2</div> -->
+      </div>
+    </div>
+
+    <button class="page-nav-btn next" id="nextBtn" title="下一页 (→ 或 D)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="9 18 15 12 9 6"></polyline>
+      </svg>
+    </button>
+  </div>
+
+  <!-- 底部控制栏 -->
+  <div class="footer">
+    <div class="slider-wrapper">
+      <input type="range" id="pageSlider" min="1" max="100" value="1" class="page-slider">
+      <div class="slider-label" id="sliderLabel">1-2</div>
+    </div>
+    <div class="footer-controls">
+      <div class="shortcuts-hint">
+        <div><kbd>←/→</kbd> 翻页</div>
+        <div><kbd>↑/↓</kbd> 前进/后退</div>
+        <div><kbd>A/D</kbd> 翻页</div>
+        <div><kbd>R</kbd> 切换方向</div>
+        <div><kbd>M</kbd> 单页/双页</div>
+        <div><kbd>F</kbd> 全屏</div>
+        <div><kbd>Esc</kbd> 返回</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/reader.js"></script>
+</body>
+
+</html>
