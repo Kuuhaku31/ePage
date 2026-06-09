@@ -1,29 +1,20 @@
-const express = require('express');
-const path = require('path');
-const fs = require('fs').promises;
-const cors = require('cors');
 
-const app = express();
-const PORT = 3000;
+// 引入各种模块和库
+import express, { json } from 'express';                     // Express 框架
+import { normalize, isAbsolute, join, extname } from 'path'; //路径模块
+import { promises as fs } from 'fs';                         //文件系统模块的 Promise 版本
+import cors from 'cors';                                     // CORS 中间件
 
-// 图片根路径 - Docker中映射的卷路径
-const IMAGE_ROOT = '/images';  // 在Docker中映射的卷路径
+
+const app = express();        // 创建 Express 应用
+const PORT = 3000;            // 定义服务器端口
+const IMAGE_ROOT = '/images'; // 在Docker中映射的卷路径
 
 // 支持的图片扩展名
 const SUPPORTED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
 
-app.use(cors());
-app.use(express.json());
-
-// 禁用静态文件缓存 - 确保修改立即生效
-app.use((req, res, next) => {
-    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-    res.set('Pragma', 'no-cache');
-    res.set('Expires', '0');
-    next();
-});
-
-app.use(express.static('public'));
+app.use(cors()); // 启用 CORS 中间件，允许跨域请求
+app.use(json()); // 解析 JSON 请求体
 
 /**
  * POST /api/images
@@ -39,13 +30,13 @@ app.post('/api/images', async (req, res) => {
         }
 
         // 防止路径遍历攻击
-        const normalizedPath = path.normalize(relativePath);
-        if (normalizedPath.startsWith('..') || path.isAbsolute(normalizedPath)) {
+        const normalizedPath = normalize(relativePath);
+        if (normalizedPath.startsWith('..') || isAbsolute(normalizedPath)) {
             return res.status(403).json({ error: '无效的路径' });
         }
 
         // 构建完整路径
-        const fullPath = path.join(IMAGE_ROOT, normalizedPath);
+        const fullPath = join(IMAGE_ROOT, normalizedPath);
 
         // 确保路径在IMAGE_ROOT内
         if (!fullPath.startsWith(IMAGE_ROOT)) {
@@ -64,14 +55,14 @@ app.post('/api/images', async (req, res) => {
         // 过滤出图片文件
         const images = [];
         for (const file of files) {
-            const ext = path.extname(file).toLowerCase();
+            const ext = extname(file).toLowerCase();
             if (SUPPORTED_EXTENSIONS.includes(ext)) {
-                const filePath = path.join(fullPath, file);
+                const filePath = join(fullPath, file);
                 const fileStats = await fs.stat(filePath);
                 if (fileStats.isFile()) {
                     images.push({
                         name: file,
-                        relativePath: path.join(normalizedPath, file).replace(/\\/g, '/'),
+                        relativePath: join(normalizedPath, file).replace(/\\/g, '/'),
                         size: fileStats.size,
                     });
                 }
@@ -102,12 +93,12 @@ app.get('/api/image/:imagePath(*)', async (req, res) => {
         const imagePath = req.params.imagePath;
 
         // 防止路径遍历攻击
-        const normalizedPath = path.normalize(imagePath);
-        if (normalizedPath.startsWith('..') || path.isAbsolute(normalizedPath)) {
+        const normalizedPath = normalize(imagePath);
+        if (normalizedPath.startsWith('..') || isAbsolute(normalizedPath)) {
             return res.status(403).json({ error: '无效的路径' });
         }
 
-        const fullPath = path.join(IMAGE_ROOT, normalizedPath);
+        const fullPath = join(IMAGE_ROOT, normalizedPath);
 
         // 确保路径在IMAGE_ROOT内
         if (!fullPath.startsWith(IMAGE_ROOT)) {
@@ -121,7 +112,7 @@ app.get('/api/image/:imagePath(*)', async (req, res) => {
         }
 
         // 验证是否是支持的图片格式
-        const ext = path.extname(fullPath).toLowerCase();
+        const ext = extname(fullPath).toLowerCase();
         if (!SUPPORTED_EXTENSIONS.includes(ext)) {
             return res.status(403).json({ error: '不支持的文件类型' });
         }

@@ -1,16 +1,19 @@
 version: "3.8"
+name: e-page
 
 services:
   app:
     build: .
-    container_name: image-gallery-app
+    container_name: ePage
     ports:
       - "13000:3000"
+
     volumes:
       # 目录挂载到容器中
       - D:/html/res:/images
-      # 挂载当前目录下的 public 目录到容器中的 /app/public
       - ./public:/app/public
+
     environment:
-      - NODE_ENV=production
-    restart: unless-stopped
+      - NODE_ENV=production # 生产环境
+
+    restart: unless-stopped # 除非手动停止，否则总是重启

@@ -1,3 +1,6 @@
+
+console.log('ePage 前端脚本已加载');
+
 // ==================== DOM 元素 ====================
 const pathInput = document.getElementById('pathInput');
 const loadBtn = document.getElementById('loadBtn');
@@ -96,9 +99,9 @@ function getErrorStateHTML() {
 
 // ==================== 加载图片 ====================
 async function loadImages() {
-    const relativePath = pathInput.value.trim();
+    const relativePath = pathInput.value.trim(); // 获取用户输入的相对路径
 
-    if (!relativePath) {
+    if(!relativePath) {
         showStatus('❌ 请输入文件夹路径', 'error');
         return;
     }
@@ -107,7 +110,7 @@ async function loadImages() {
     gallery.innerHTML = '';
     infoBar.style.display = 'none';
 
-    try {
+    try{
         const response = await fetch('/api/images', {
             method: 'POST',
             headers: {
@@ -116,14 +119,14 @@ async function loadImages() {
             body: JSON.stringify({ relativePath }),
         });
 
-        if (!response.ok) {
+        if(!response.ok) {
             const error = await response.json();
             throw new Error(error.error || '加载失败');
         }
 
         const data = await response.json();
 
-        if (data.count === 0) {
+        if(data.count === 0) {
             showStatus(`✓ 已加载，但该文件夹中没有漫画`, 'success');
             gallery.innerHTML = getEmptyStateHTML();
         } else {
@@ -150,10 +153,10 @@ async function loadImages() {
 // ==================== 恢复之前的状态 ====================
 function restorePreviousState() {
     const savedPath = sessionStorage.getItem('mangaPath');
-    if (savedPath) {
+    if(savedPath) {
         pathInput.value = savedPath;
         const savedImages = sessionStorage.getItem('mangaImages');
-        if (savedImages) {
+        if(savedImages) {
             // 直接显示已加载的图片，无需重新加载
             const images = JSON.parse(savedImages);
             const imageHTML = images.map((img, index) => generateImageCard(img, index)).join('');
@@ -176,11 +179,7 @@ function restorePreviousState() {
 
 // ==================== 事件绑定 ====================
 loadBtn.addEventListener('click', loadImages);
-pathInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        loadImages();
-    }
-});
+pathInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') loadImages(); });
 
 // 页面加载时恢复之前的状态
 window.addEventListener('load', restorePreviousState);
