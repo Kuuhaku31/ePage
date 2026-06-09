@@ -1,8 +1,9 @@
 // ==================== 全局变量 ====================
+// 阅读器核心状态
 let mangaImages = [];
-let currentPageIndex = 0;
+let currentPageIndex = 0; // 当前索引（基于数组索引，0 开始）
 let mangaPath = '';
-let isRTL = true; // 默认从右向左
+let isRTL = true; // 默认从右向左阅读
 let isSinglePageMode = false; // 默认双页显示
 
 // 阅读方向常量
@@ -18,10 +19,9 @@ const PAGE_MODE = {
 };
 
 // ==================== DOM 元素 ====================
+// DOM 元素引用（在 DOMContentLoaded 前可能为 null）
 const leftPageImg = document.getElementById('leftPageImg');
 const rightPageImg = document.getElementById('rightPageImg');
-const leftPageNumber = document.getElementById('leftPageNumber');
-const rightPageNumber = document.getElementById('rightPageNumber');
 const currentPageNum = document.getElementById('currentPageNum');
 const nextPageNum = document.getElementById('nextPageNum');
 const totalPages = document.getElementById('totalPages');
@@ -34,17 +34,19 @@ const directionLabel = document.getElementById('directionLabel');
 const modeBtn = document.getElementById('modeBtn');
 const modeIcon = document.getElementById('modeIcon');
 const modeLabel = document.getElementById('modeLabel');
-
 const prevBtn = document.getElementById('prevBtn');
 const nextBtn = document.getElementById('nextBtn');
 const backBtn = document.getElementById('backBtn');
 const fullscreenBtn = document.getElementById('fullscreenBtn');
-
 const pagesContainer = document.getElementById('pagesContainer');
+
+// 注意：页面上有两个单页控制按钮，确保它们存在再绑定事件
+const oneLeftBtn = document.getElementById('one_left');
+const oneRightBtn = document.getElementById('one_right');
 
 // ==================== 初始化 ====================
 function init() {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(window.location.search); // 获取 URL 参数
     mangaPath = params.get('path') || sessionStorage.getItem('mangaPath');
     const imageDataStr = sessionStorage.getItem('mangaImages');
     const startIndex = parseInt(sessionStorage.getItem('startIndex')) || 0;
@@ -64,9 +66,10 @@ function init() {
     const savedPageMode = sessionStorage.getItem('pageMode') || PAGE_MODE.DOUBLE;
     isSinglePageMode = savedPageMode === PAGE_MODE.SINGLE;
 
-    mangaTitle.textContent = mangaPath.split('/').pop();
-    totalPages.textContent = mangaImages.length;
-    pageSlider.max = Math.ceil(mangaImages.length / 2) * 2;
+    // 更新 UI 元素（存在性检查以防止 null 访问）
+    if (mangaTitle) mangaTitle.textContent = mangaPath.split('/').pop();
+    if (totalPages) totalPages.textContent = mangaImages.length;
+    if (pageSlider) pageSlider.max = Math.ceil(mangaImages.length / 2) * 2;
 
     updateReadingModeUI();
     updatePageModeUI();
@@ -83,20 +86,21 @@ function toggleReadingMode() {
 }
 
 function updateReadingModeUI() {
+    if (!pagesContainer) return;
     if (isRTL) {
         pagesContainer.classList.add('rtl');
-        directionLabel.textContent = '从右向左';
-        directionIcon.textContent = '📖';
-        directionBtn.classList.add('active');
-        prevBtn.title = '下一页 (←)';
-        nextBtn.title = '上一页 (→)';
+        if (directionLabel) directionLabel.textContent = '从右向左';
+        if (directionIcon) directionIcon.textContent = '📖';
+        if (directionBtn) directionBtn.classList.add('active');
+        if (prevBtn) prevBtn.title = '下一页 (←)';
+        if (nextBtn) nextBtn.title = '上一页 (→)';
     } else {
         pagesContainer.classList.remove('rtl');
-        directionLabel.textContent = '从左到右';
-        directionIcon.textContent = '📚';
-        directionBtn.classList.remove('active');
-        prevBtn.title = '上一页 (←)';
-        nextBtn.title = '下一页 (→)';
+        if (directionLabel) directionLabel.textContent = '从左到右';
+        if (directionIcon) directionIcon.textContent = '📚';
+        if (directionBtn) directionBtn.classList.remove('active');
+        if (prevBtn) prevBtn.title = '上一页 (←)';
+        if (nextBtn) nextBtn.title = '下一页 (→)';
     }
 }
 
@@ -109,23 +113,24 @@ function togglePageMode() {
 }
 
 function updatePageModeUI() {
+    if (!pagesContainer) return;
     if (isSinglePageMode) {
         pagesContainer.classList.add('single-page');
-        modeLabel.textContent = '单页';
-        modeIcon.textContent = '📄';
-        modeBtn.classList.add('active');
+        if (modeLabel) modeLabel.textContent = '单页';
+        if (modeIcon) modeIcon.textContent = '📄';
+        if (modeBtn) modeBtn.classList.add('active');
     } else {
         pagesContainer.classList.remove('single-page');
-        modeLabel.textContent = '双页';
-        modeIcon.textContent = '📖';
-        modeBtn.classList.remove('active');
+        if (modeLabel) modeLabel.textContent = '双页';
+        if (modeIcon) modeIcon.textContent = '📖';
+        if (modeBtn) modeBtn.classList.remove('active');
     }
 }
 
 
 // ==================== 页面更新 ====================
 function updatePages() {
-    let leftIndex, rightIndex, displayIndex;
+    let leftIndex, rightIndex;
 
 
     // 双页模式：显示两页
@@ -140,16 +145,13 @@ function updatePages() {
     }
 
     // 更新页码显示
+    // 更新页码显示（保护性检查 DOM）
     if (isSinglePageMode) {
-        currentPageNum.textContent = displayIndex + 1;
-        nextPageNum.textContent = '';
-        // leftPageNumber.textContent = displayIndex + 1;
-        // rightPageNumber.textContent = '';
+        if (currentPageNum) currentPageNum.textContent = (Math.min(currentPageIndex, mangaImages.length - 1) + 1).toString();
+        if (nextPageNum) nextPageNum.textContent = '';
     } else {
-        currentPageNum.textContent = leftIndex + 1;
-        nextPageNum.textContent = rightIndex + 1;
-        // leftPageNumber.textContent = leftIndex + 1;
-        // rightPageNumber.textContent = rightIndex + 1;
+        if (currentPageNum) currentPageNum.textContent = (Math.max(0, leftIndex) + 1).toString();
+        if (nextPageNum) nextPageNum.textContent = (Math.min(mangaImages.length - 1, rightIndex) + 1).toString();
     }
 
     // 更新滑块和标签
@@ -183,50 +185,50 @@ function updateSliderDisplay() {
         }
     }
 
-    pageSlider.value = displayPageNum;
-    sliderLabel.textContent = displayText;
+    if (pageSlider) pageSlider.value = displayPageNum;
+    if (sliderLabel) sliderLabel.textContent = displayText;
 }
 
 function loadPageImages(leftIndex, rightIndex) {
-    leftPageImg.src = '';
-    rightPageImg.src = '';
+    if (leftPageImg) leftPageImg.src = '';
+    if (rightPageImg) rightPageImg.src = '';
 
     if (isSinglePageMode) {
         // 单页模式：只显示左侧页面（或基于RTL的页面）
-        if (leftIndex >= 0 && leftIndex < mangaImages.length) {
-            pagesContainer.classList.add('loading');
+        if (leftIndex >= 0 && leftIndex < mangaImages.length && leftPageImg) {
+            if (pagesContainer) pagesContainer.classList.add('loading');
             const imgPath = mangaImages[leftIndex].relativePath;
-            leftPageImg.onload = () => pagesContainer.classList.remove('loading');
-            leftPageImg.onerror = () => pagesContainer.classList.remove('loading');
+            leftPageImg.onload = () => { if (pagesContainer) pagesContainer.classList.remove('loading'); };
+            leftPageImg.onerror = () => { if (pagesContainer) pagesContainer.classList.remove('loading'); };
             leftPageImg.src = `/api/image/${imgPath}`;
         }
 
-        if (rightIndex >= 0 && rightIndex < mangaImages.length) {
-            pagesContainer.classList.add('loading');
+        if (rightIndex >= 0 && rightIndex < mangaImages.length && rightPageImg) {
+            if (pagesContainer) pagesContainer.classList.add('loading');
             const imgPath = mangaImages[rightIndex].relativePath;
-            rightPageImg.onload = () => pagesContainer.classList.remove('loading');
-            rightPageImg.onerror = () => pagesContainer.classList.remove('loading');
+            rightPageImg.onload = () => { if (pagesContainer) pagesContainer.classList.remove('loading'); };
+            rightPageImg.onerror = () => { if (pagesContainer) pagesContainer.classList.remove('loading'); };
             rightPageImg.src = `/api/image/${imgPath}`;
-        } else {
+        } else if (rightPageImg) {
             rightPageImg.src = '';
         }
     } else {
         // 双页模式
-        if (leftIndex >= 0 && leftIndex < mangaImages.length) {
-            pagesContainer.classList.add('loading');
+        if (leftIndex >= 0 && leftIndex < mangaImages.length && leftPageImg) {
+            if (pagesContainer) pagesContainer.classList.add('loading');
             const imgPath = mangaImages[leftIndex].relativePath;
-            leftPageImg.onload = () => pagesContainer.classList.remove('loading');
-            leftPageImg.onerror = () => pagesContainer.classList.remove('loading');
+            leftPageImg.onload = () => { if (pagesContainer) pagesContainer.classList.remove('loading'); };
+            leftPageImg.onerror = () => { if (pagesContainer) pagesContainer.classList.remove('loading'); };
             leftPageImg.src = `/api/image/${imgPath}`;
         }
 
-        if (rightIndex >= 0 && rightIndex < mangaImages.length) {
-            pagesContainer.classList.add('loading');
+        if (rightIndex >= 0 && rightIndex < mangaImages.length && rightPageImg) {
+            if (pagesContainer) pagesContainer.classList.add('loading');
             const imgPath = mangaImages[rightIndex].relativePath;
-            rightPageImg.onload = () => pagesContainer.classList.remove('loading');
-            rightPageImg.onerror = () => pagesContainer.classList.remove('loading');
+            rightPageImg.onload = () => { if (pagesContainer) pagesContainer.classList.remove('loading'); };
+            rightPageImg.onerror = () => { if (pagesContainer) pagesContainer.classList.remove('loading'); };
             rightPageImg.src = `/api/image/${imgPath}`;
-        } else {
+        } else if (rightPageImg) {
             rightPageImg.src = '';
         }
     }
@@ -235,18 +237,18 @@ function loadPageImages(leftIndex, rightIndex) {
 function updateNavButtonStates() {
     if (isSinglePageMode) {
         // 单页模式：每次翻页 1 页
-        prevBtn.disabled = currentPageIndex <= 0;
-        nextBtn.disabled = currentPageIndex >= mangaImages.length - 1;
+        if (prevBtn) prevBtn.disabled = currentPageIndex <= 0;
+        if (nextBtn) nextBtn.disabled = currentPageIndex >= mangaImages.length - 1;
     } else {
         // 双页模式：每次翻页 2 页
         if (isRTL) {
             // RTL 模式：上一页和下一页方向相反
-            prevBtn.disabled = currentPageIndex >= mangaImages.length - 2;
-            nextBtn.disabled = currentPageIndex <= 0;
+            if (prevBtn) prevBtn.disabled = currentPageIndex >= mangaImages.length - 2;
+            if (nextBtn) nextBtn.disabled = currentPageIndex <= 0;
         } else {
             // LTR 模式：正常方向
-            prevBtn.disabled = currentPageIndex <= 0;
-            nextBtn.disabled = currentPageIndex >= mangaImages.length - 2;
+            if (prevBtn) prevBtn.disabled = currentPageIndex <= 0;
+            if (nextBtn) nextBtn.disabled = currentPageIndex >= mangaImages.length - 2;
         }
     }
 }
@@ -267,7 +269,7 @@ function prevPage() {
                 currentPageIndex += 2;
                 updatePages();
             } else if (currentPageIndex + 1 < mangaImages.length) {
-                currentPageIndex += 2;
+                currentPageIndex = mangaImages.length - 1;
                 updatePages();
             }
         } else {
@@ -301,7 +303,7 @@ function nextPage() {
                 currentPageIndex += 2;
                 updatePages();
             } else if (currentPageIndex + 1 < mangaImages.length) {
-                currentPageIndex += 2;
+                currentPageIndex = mangaImages.length - 1;
                 updatePages();
             }
         }
@@ -414,33 +416,6 @@ function bindEvents() {
         }
     });
 
-    // 触摸支持
-    // let touchStartX = 0;
-    // document.addEventListener('touchstart', (e) => {
-    //     touchStartX = e.touches[0].clientX;
-    // });
-
-    // document.addEventListener('touchend', (e) => {
-    //     const touchEndX = e.changedTouches[0].clientX;
-    //     const diff = touchStartX - touchEndX;
-
-    //     if (Math.abs(diff) > 50) {
-    //         if (diff > 0) {
-    //             nextPage(); // 从右到左滑动
-    //         } else {
-    //             prevPage(); // 从左到右滑动
-    //         }
-    //     }
-    // });
-
-    // document.addEventListener(
-    //     "touchmove",
-    //     function (e) {
-    //         e.preventDefault();
-    //     },
-    //     { passive: false }
-    // );
-
     // 禁用移动端双击放大
     let lastTap = 0;
     document.addEventListener('touchend', (e) => {
@@ -455,11 +430,3 @@ function bindEvents() {
 
 // ==================== 页面加载 ====================
 window.addEventListener('DOMContentLoaded', init);
-
-// 防止意外离开
-window.addEventListener('beforeunload', (e) => {
-    if (mangaImages.length > 0) {
-        e.preventDefault();
-        e.returnValue = '';
-    }
-});
