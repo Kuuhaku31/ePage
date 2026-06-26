@@ -9,8 +9,8 @@ services:
       - "13000:3000"
 
     volumes:
-      # 目录挂载到容器中
-      - D:/html/res:/images
+      # 将 config.env 中的 IMAGES_HOST_DIR 挂载到容器的 /images
+      - "${IMAGES_HOST_DIR:-D:/def/e/comic}:/images"
       - ./public:/app/public
 
     environment:

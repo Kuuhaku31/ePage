@@ -1,5 +1,10 @@
 @echo off
+setlocal
 REM 快速启动脚本 - 图片浏览器 Docker 应用
+
+set "SCRIPT_DIR=%~dp0"
+set "CONFIG_FILE=%SCRIPT_DIR%config.env"
+set "IMAGES_HOST_DIR=D:/def/e/comic"
 
 echo.
 echo ========================================
@@ -19,19 +24,36 @@ if errorlevel 1 (
 echo ✓ Docker 已安装
 echo.
 
-REM 创建图片存储目录
-echo 📁 创建图片存储目录...
-if not exist "D:\def" mkdir D:\def
-if not exist "D:\def\img" mkdir D:\def\img
-if not exist "D:\def\img\a" mkdir D:\def\img\a
-echo ✓ 目录已创建：D:\def\img\a
+REM 读取配置文件中的 Docker /images 映射目录
+if exist "%CONFIG_FILE%" (
+    for /f "usebackq tokens=1,* delims==" %%A in ("%CONFIG_FILE%") do (
+        if /I "%%A"=="IMAGES_HOST_DIR" set "IMAGES_HOST_DIR=%%B"
+    )
+)
+set "IMAGES_HOST_DIR=%IMAGES_HOST_DIR:"=%"
+
+if "%IMAGES_HOST_DIR%"=="" (
+    echo ❌ config.env 中 IMAGES_HOST_DIR 不能为空
+    pause
+    exit /b 1
+)
+
+REM 创建图片映射目录
+set "IMAGES_HOST_DIR_WIN=%IMAGES_HOST_DIR:/=\%"
+echo 📁 创建图片映射目录...
+if not exist "%IMAGES_HOST_DIR_WIN%" mkdir "%IMAGES_HOST_DIR_WIN%"
+echo ✓ /images 将映射到：%IMAGES_HOST_DIR%
 echo.
 
 REM 启动 Docker Compose
 echo 🐳 启动 Docker 容器...
 echo.
-cd /d "d:\html\RPage"
-docker-compose up --build
+cd /d "%SCRIPT_DIR%"
+if exist "%CONFIG_FILE%" (
+    docker-compose --env-file "%CONFIG_FILE%" up --build
+) else (
+    docker-compose up --build
+)
 
 echo.
 echo ========================================

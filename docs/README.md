@@ -23,24 +23,23 @@
 1. **克隆或下载项目到本地**
 
 ```bash
-cd d:\html\RPage
+cd D:\html\ePage
 ```
 
-2. **创建图片存储文件夹**
+2. **配置图片存储文件夹**
 
-```powershell
-# Windows PowerShell
-mkdir D:\def
-mkdir D:\def\img
-mkdir D:\def\img\a
+编辑 `config.env`：
 
-# 可选：复制一些测试图片到 D:\def\img\a
+```env
+IMAGES_HOST_DIR=D:/def/e/comic
 ```
+
+启动脚本会自动创建该目录。
 
 3. **启动 Docker 容器**
 
 ```bash
-docker-compose up --build
+docker-compose --env-file config.env up --build
 ```
 
 首次运行会自动构建镜像并启动容器。
@@ -62,11 +61,11 @@ docker-compose up --build
 
 ### 路径规则
 
-- **相对路径**：相对于 Docker 中挂载的 `/images` 目录（即本机的 `D:/def/`）
+- **相对路径**：相对于 Docker 中挂载的 `/images` 目录（即 `config.env` 中的 `IMAGES_HOST_DIR`）
 - **示例**：
-  - `img/a` → `D:\def\img\a`
-  - `photos/2024` → `D:\def\photos\2024`
-  - `myalbum` → `D:\def\myalbum`
+  - `img/a` → `IMAGES_HOST_DIR\img\a`
+  - `photos/2024` → `IMAGES_HOST_DIR\photos\2024`
+  - `myalbum` → `IMAGES_HOST_DIR\myalbum`
 
 ### 支持的图片格式
 
@@ -78,42 +77,40 @@ docker-compose up --build
 
 ## 🐳 Docker 配置
 
-### docker-compose.yml 说明
+### config.env 说明
 
-```yaml
-volumes:
-  - D:/def:/images # 本机文件夹 ↔ 容器内路径
+```env
+IMAGES_HOST_DIR=D:/def/e/comic
 ```
 
-- **本机路径**：`D:/def/` - 你的本地图片存储位置
+- **本机路径**：`IMAGES_HOST_DIR` - 你的本地图片存储位置
 - **容器路径**：`/images` - 容器内的挂载点
 
 ### 修改存储路径
 
-如需修改本机的图片存储位置，编辑 `docker-compose.yml`：
+如需修改本机的图片存储位置，编辑 `config.env`：
 
-```yaml
-volumes:
-  - E:/MyPictures:/images # 改为你需要的路径
+```env
+IMAGES_HOST_DIR=E:/MyPictures
 ```
 
 ## 🔧 常用命令
 
 ```bash
 # 启动容器
-docker-compose up
+docker-compose --env-file config.env up
 
 # 后台启动
-docker-compose up -d
+docker-compose --env-file config.env up -d
 
 # 停止容器
-docker-compose down
+docker-compose --env-file config.env down
 
 # 查看日志
 docker-compose logs -f
 
 # 重新构建镜像
-docker-compose up --build
+docker-compose --env-file config.env up --build
 ```
 
 ## 🔒 安全特性
@@ -125,7 +122,8 @@ docker-compose up --build
 ## 📁 项目结构
 
 ```
-RPage/
+ePage/
+├── config.env              # Docker /images 映射目录配置
 ├── Dockerfile              # Docker 镜像定义
 ├── docker-compose.yml      # Docker Compose 配置
 ├── package.json            # Node.js 依赖
@@ -181,7 +179,7 @@ ports:
 
 ### Q: Windows 路径格式问题？
 
-A: `docker-compose.yml` 支持 Windows 路径格式（`D:/def`），Docker for Windows 会自动处理
+A: `config.env` 支持 Windows 路径格式（如 `D:/def/e/comic`），Docker for Windows 会自动处理
 
 ## 📝 API 参考
 
@@ -202,7 +200,7 @@ A: `docker-compose.yml` 支持 Windows 路径格式（`D:/def`），Docker for W
 ```json
 {
   "success": true,
-  "path": "D:/def/img/a",
+  "path": "/images/img/a",
   "count": 5,
   "images": [
     {

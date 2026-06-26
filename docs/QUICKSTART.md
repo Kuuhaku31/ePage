@@ -13,14 +13,14 @@
 **方式 2：手动命令**
 
 ```powershell
-cd d:\html\RPage
-docker-compose up --build
+cd D:\html\ePage
+docker-compose --env-file config.env up --build
 ```
 
 ### Mac/Linux 用户
 
 ```bash
-cd d/html/RPage
+cd /path/to/ePage
 bash start.sh
 ```
 
@@ -47,7 +47,7 @@ bash start.sh
 
 | 步骤 | 操作                     | 说明                     |
 | ---- | ------------------------ | ------------------------ |
-| 1    | 在输入框输入 `img/a`     | 访问 D:\def\img\a 文件夹 |
+| 1    | 在输入框输入 `img/a`     | 访问 `IMAGES_HOST_DIR\img\a` 文件夹 |
 | 2    | 点击"加载图片"或按 Enter | 获取该文件夹中的所有图片 |
 | 3    | 查看网格显示的图片       | 显示图片名称和文件大小   |
 
@@ -59,21 +59,21 @@ bash start.sh
 
 ```
 输入路径：photos/2024/summer
-访问位置：D:\def\photos\2024\summer
+访问位置：IMAGES_HOST_DIR\photos\2024\summer
 ```
 
 ### 场景 2：浏览根目录的图片
 
 ```
 输入路径：.
-访问位置：D:\def\
+访问位置：IMAGES_HOST_DIR
 ```
 
 ### 场景 3：查看嵌套文件夹
 
 ```
 输入路径：archive/old/albums/family
-访问位置：D:\def\archive\old\albums\family
+访问位置：IMAGES_HOST_DIR\archive\old\albums\family
 ```
 
 ---
@@ -81,15 +81,15 @@ bash start.sh
 ## 🛑 停止应用
 
 - **Ctrl + C** 在终端中停止容器
-- 或运行：`docker-compose down`
+- 或运行：`docker-compose --env-file config.env down`
 
 ---
 
 ## 🔄 重新启动应用
 
 ```bash
-cd d:\html\RPage
-docker-compose restart
+cd D:\html\ePage
+docker-compose --env-file config.env restart
 ```
 
 ---
@@ -100,7 +100,7 @@ docker-compose restart
 
 ```powershell
 # 创建测试图片（使用在线图片）
-$path = "D:\def\img\a"
+$path = "D:\def\e\comic\img\a"
 mkdir $path -Force
 
 # 下载示例图片
@@ -110,7 +110,7 @@ Invoke-WebRequest -Uri "https://via.placeholder.com/400" `
 
 ### 或手动操作
 
-1. 打开 `D:\def\img\a` 文件夹
+1. 打开 `config.env` 中 `IMAGES_HOST_DIR` 对应目录下的 `img\a` 文件夹
 2. 复制你的图片文件到该文件夹
 3. 在应用中输入 `img/a` 并加载
 
@@ -118,14 +118,13 @@ Invoke-WebRequest -Uri "https://via.placeholder.com/400" `
 
 ## ⚙️ 修改存储路径
 
-如需改变图片存储位置（默认 D:\def）：
+如需改变 Docker 容器内 `/images` 对应的本机图片目录：
 
-1. 打开 `docker-compose.yml`
-2. 修改 `volumes` 部分：
+1. 打开 `config.env`
+2. 修改 `IMAGES_HOST_DIR`：
 
-```yaml
-volumes:
-  - E:/MyPictures:/images # 改为你的路径
+```env
+IMAGES_HOST_DIR=E:/MyPictures
 ```
 
 3. 重新启动容器
@@ -179,7 +178,7 @@ http://localhost:3000
     ↓
 Docker 容器 (Node.js + Express)
     ↓
-访问 D:\def 文件夹内的图片
+访问 config.env 中 IMAGES_HOST_DIR 文件夹内的图片
     ↓
 网页显示图片列表
 ```
