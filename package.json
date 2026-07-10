@@ -1,6 +1,7 @@
 {
   "name": "e-page-app",
   "version": "1.0.0",
+  "type": "module",
   "description": "Web app to browse images from local folders via Docker",
   "main": "server.js",
   "scripts": {

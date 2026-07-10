@@ -14,11 +14,25 @@
       <h1>📖 漫画浏览器</h1>
 
       <div class="input-group">
-        <input type="text" id="pathInput" placeholder="输入相对路径，例如: img/a 或 photos/2024" autocomplete="off">
-        <button id="loadBtn">加载漫画</button>
+        <input type="text" id="pathInput" value="." placeholder="输入相对路径，例如: img/a 或 photos/2024" autocomplete="off">
+        <button id="loadBtn">打开目录</button>
+        <button id="rootBtn" class="secondary-btn">根目录</button>
       </div>
 
       <div id="status" class="status"></div>
+
+      <div id="pathBar" class="path-bar" style="display: none;">
+        <span>当前位置</span>
+        <div id="breadcrumb" class="breadcrumb"></div>
+      </div>
+
+      <div id="folderPanel" class="folder-panel" style="display: none;">
+        <div class="section-heading">
+          <span>文件夹</span>
+          <strong id="folderCountDisplay">0</strong>
+        </div>
+        <div id="folderList" class="folder-list"></div>
+      </div>
 
       <div class="info-bar" id="infoBar" style="display: none;">
         <span>📁 路径: <strong id="pathDisplay"></strong></span>

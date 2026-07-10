@@ -81,6 +81,16 @@ button:disabled {
   cursor: not-allowed;
 }
 
+.secondary-btn {
+  background: #f6f7fb;
+  color: #4f5fb8;
+  border: 1px solid #d8dcf0;
+}
+
+.secondary-btn:hover:not(:disabled) {
+  box-shadow: 0 5px 15px rgba(79, 95, 184, 0.18);
+}
+
 .info-bar {
   display: flex;
   align-items: center;
@@ -98,6 +108,125 @@ button:disabled {
 
 .info-bar strong {
   color: #333;
+}
+
+.path-bar {
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 12px 14px;
+  background: #f8f9fb;
+  border: 1px solid #e5e7ef;
+  border-radius: 8px;
+}
+
+.path-bar > span {
+  flex: 0 0 auto;
+  color: #666;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+.breadcrumb-item {
+  width: auto;
+  padding: 6px 10px;
+  background: white;
+  color: #4f5fb8;
+  border: 1px solid #d8dcf0;
+  border-radius: 6px;
+  font-size: 13px;
+  box-shadow: none;
+}
+
+.breadcrumb-item:hover:not(:disabled) {
+  transform: none;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.18);
+}
+
+.breadcrumb-separator {
+  color: #a0a3ad;
+}
+
+.folder-panel {
+  margin-top: 18px;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: #333;
+  font-weight: 700;
+}
+
+.section-heading strong {
+  min-width: 26px;
+  padding: 2px 8px;
+  background: #eef1ff;
+  color: #4f5fb8;
+  border-radius: 999px;
+  font-size: 12px;
+  text-align: center;
+}
+
+.folder-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 10px;
+}
+
+.folder-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 12px;
+  background: #fff;
+  color: #333;
+  border: 1px solid #e4e6ef;
+  border-radius: 8px;
+  box-shadow: none;
+  text-align: left;
+}
+
+.folder-item:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: #c8cef4;
+}
+
+.parent-folder {
+  background: #f8f9fb;
+}
+
+.folder-icon {
+  flex: 0 0 auto;
+  font-size: 18px;
+}
+
+.folder-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.folder-empty {
+  padding: 12px 14px;
+  color: #888;
+  background: #f8f9fb;
+  border: 1px dashed #d8dce8;
+  border-radius: 8px;
 }
 
 .status {
@@ -266,6 +395,15 @@ button:disabled {
   .input-group input,
   button {
     width: 100%;
+  }
+
+  .path-bar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .folder-list {
+    grid-template-columns: 1fr;
   }
 
   .gallery {
