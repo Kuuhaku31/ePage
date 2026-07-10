@@ -5,11 +5,11 @@ services:
     build: .
     container_name: ePage
     ports:
-      - "13000:3000"
+      - "${PORT}:3000"
 
     volumes:
       # 将 config.env 中的 IMAGES_HOST_DIR 挂载到容器的 /images
-      - "${IMAGES_HOST_DIR:-D:/def/e/comic}:/images"
+      - "${IMAGES_HOST_DIR}:/images"
 
     environment:
       NODE_ENV: production
