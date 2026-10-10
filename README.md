@@ -22,6 +22,7 @@
 
 ```env
 IMAGES_HOST_DIR=D:/html/res
+PORT=13300
 ```
 
 Windows 路径建议使用 `/`，不要写成 `D:\html\res`。该目录会映射到容器内的 `/images`。
@@ -41,7 +42,7 @@ bash start.sh
 3. 打开浏览器：
 
 ```text
-http://localhost:13000
+http://localhost:13300
 ```
 
 4. 默认会打开根目录。可以点击文件夹切换目录，也可以输入相对路径并打开，例如：
@@ -84,7 +85,7 @@ docker-compose logs -f app
 docker-compose exec app sh
 ```
 
-`docker-compose.yml` 当前端口映射为 `13000:3000`：宿主机访问 `13000`，容器内服务端口是 `3000`。
+默认端口映射为 `13300:3000`：宿主机访问 `13300`，容器内服务端口是 `3000`。可在 `config.env` 中通过 `PORT` 修改宿主机端口。
 
 ## 阅读操作
 
@@ -187,7 +188,7 @@ ePage/
 
 - 确认容器已启动：`docker ps`
 - 查看日志：`docker-compose logs -f app`
-- 确认访问地址是 `http://localhost:13000`
+- 确认访问地址是 `http://localhost:13300`（或 `config.env` 中 `PORT` 对应的端口）
 
 **提示目录不存在**
 

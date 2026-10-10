@@ -5,11 +5,12 @@ services:
     build: .
     container_name: ePage
     ports:
-      - "${PORT}:3000"
+      # 提供可用的默认端口，直接运行 `docker compose up` 时也不会得到空映射。
+      - "17310:3000"
 
     volumes:
       # 将 config.env 中的 IMAGES_HOST_DIR 挂载到容器的 /images
-      - "${IMAGES_HOST_DIR}:/images"
+      - "D:/html/manga:/images"
 
     environment:
       NODE_ENV: production

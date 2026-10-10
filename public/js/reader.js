@@ -20,6 +20,10 @@ const PAGE_MODE = {
 
 const ROOT_PATH = "/api/image/";
 
+function encodePathForUrl(path) {
+    return path.split('/').map(encodeURIComponent).join('/');
+}
+
 // ==================== DOM 元素 ====================
 // DOM 元素引用（在 DOMContentLoaded 前可能为 null）
 // const leftPageImg = document.getElementById('leftPageImg');
@@ -213,7 +217,7 @@ function RenderPageImages(indexArray) {
 
         const imgElement = document.createElement('img');   // 创建新的 img 元素
         const imgPath    = mangaImages[index].relativePath; // 获取图片相对路径
-        imgElement.src   = `${ROOT_PATH}${imgPath}`;        // 设置图片源路径
+        imgElement.src   = `${ROOT_PATH}${encodePathForUrl(imgPath)}`; // 设置图片源路径
         imgElement.alt   = `Page ${index + 1}`;             // 设置 alt 属性
         imgElement.classList.add('page-image');             // 添加样式类
 

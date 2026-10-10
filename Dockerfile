@@ -15,7 +15,7 @@ RUN npm install
 COPY . .
 
 # 暴露应用运行的端口
-EXPOSE 3000
+# EXPOSE 3000
 
 # 启动应用
 CMD ["node", "server.js"]
