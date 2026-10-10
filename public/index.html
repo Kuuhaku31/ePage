@@ -17,9 +17,10 @@
         <input type="text" id="pathInput" value="." placeholder="输入相对路径，例如: img/a 或 photos/2024" autocomplete="off">
         <button id="loadBtn">打开目录</button>
         <button id="rootBtn" class="secondary-btn">根目录</button>
+        <button id="markFolderBtn" class="secondary-btn" type="button" aria-pressed="false" disabled>☆ 标记当前文件夹</button>
       </div>
 
-      <div id="status" class="status"></div>
+      <div id="status" class="status" role="status" aria-live="polite"></div>
 
       <div id="pathBar" class="path-bar" style="display: none;">
         <span>当前位置</span>

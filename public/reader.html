@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>漫画阅读器</title>
   <link rel="stylesheet" href="css/reader.css">
 </head>
@@ -37,12 +37,13 @@
         <span id="directionIcon">📖</span>
         <span id="directionLabel">从右向左</span>
       </button>
-      <button class="header-btn" id="fullscreenBtn" title="全屏 (F)">⛶ 全屏</button>
+      <button class="header-btn" id="fullscreenBtn" title="全屏 (F)" aria-pressed="false">⛶ 全屏</button>
     </div>
   </div>
 
   <!-- 阅读区域 -->
   <div class="reader-wrapper">
+    <button class="exit-fullscreen-btn" id="exitFullscreenBtn" type="button" aria-label="退出全屏">⛶ 退出全屏</button>
     <button class="page-nav-btn prev" id="leftBtn" title="上一页 (← 或 A)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <polyline points="15 18 9 12 15 6"></polyline>

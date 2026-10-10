@@ -5,6 +5,7 @@ console.log('ePage 前端脚本已加载');
 const pathInput = document.getElementById('pathInput');
 const loadBtn = document.getElementById('loadBtn');
 const rootBtn = document.getElementById('rootBtn');
+const markFolderBtn = document.getElementById('markFolderBtn');
 const gallery = document.getElementById('gallery');
 const status = document.getElementById('status');
 const infoBar = document.getElementById('infoBar');
@@ -17,6 +18,45 @@ const folderList = document.getElementById('folderList');
 const folderCountDisplay = document.getElementById('folderCountDisplay');
 
 let currentPath = '.';
+let currentFolderMarked = false;
+let directoryLoading = false;
+let markerSaving = false;
+let directoryRequestId = 0;
+
+function updateFolderMarkerUI(marked) {
+    currentFolderMarked = !!marked;
+    markFolderBtn.textContent = currentFolderMarked ? '★ 移除标记' : '☆ 标记当前文件夹';
+    markFolderBtn.setAttribute('aria-pressed', String(currentFolderMarked));
+    markFolderBtn.classList.toggle('marked', currentFolderMarked);
+    pathBar.classList.toggle('marked', currentFolderMarked);
+}
+
+async function toggleFolderMarker() {
+    if (directoryLoading || markerSaving || markFolderBtn.disabled) return;
+    const path = currentPath;
+    const requestId = directoryRequestId;
+    markerSaving = true;
+    markFolderBtn.disabled = true;
+    try {
+        const response = await fetch('/api/folder-marker', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ relativePath: path, marked: !currentFolderMarked }),
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || '修改标记失败');
+        // 保存期间可能切换了目录，不能把旧目录状态应用到新目录。
+        if (requestId === directoryRequestId) {
+            updateFolderMarkerUI(data.marked);
+            showStatus(`✓ ${getDisplayPath(path)}：${data.marked ? '已标记' : '已移除标记'}`, 'success');
+        }
+    } catch (error) {
+        if (requestId === directoryRequestId) showStatus(`❌ ${error.message}`, 'error');
+    } finally {
+        markerSaving = false;
+        if (!directoryLoading && pathBar.style.display !== 'none') markFolderBtn.disabled = false;
+    }
+}
 
 // ==================== 工具函数 ====================
 function showStatus(message, type) {
@@ -98,9 +138,10 @@ function renderFolders(folders, path) {
     }
 
     folderItems.push(...folders.map((folder) => `
-        <button class="folder-item" data-path="${escapeHTML(folder.relativePath)}" title="${escapeHTML(folder.name)}">
-            <span class="folder-icon">📁</span>
+        <button class="folder-item${folder.marked ? ' marked' : ''}" data-path="${escapeHTML(folder.relativePath)}" title="${escapeHTML(folder.name)}${folder.marked ? '（已标记）' : ''}">
+            <span class="folder-icon">${folder.marked ? '📗' : '📁'}</span>
             <span class="folder-name">${escapeHTML(folder.name)}</span>
+            ${folder.marked ? '<span class="folder-mark-badge">★ 已标记</span>' : ''}
         </button>
     `));
 
@@ -193,6 +234,9 @@ function getErrorStateHTML() {
 // ==================== 加载目录 ====================
 async function loadDirectory(path = pathInput.value) {
     const relativePath = normalizeInputPath(path);
+    const requestId = ++directoryRequestId;
+    directoryLoading = true;
+    markFolderBtn.disabled = true;
 
     showStatus('正在加载目录...', 'loading');
     gallery.innerHTML = '';
@@ -200,7 +244,7 @@ async function loadDirectory(path = pathInput.value) {
     folderPanel.style.display = 'none';
     pathBar.style.display = 'none';
 
-    try{
+    try {
         const response = await fetch('/api/images', {
             method: 'POST',
             headers: {
@@ -209,16 +253,18 @@ async function loadDirectory(path = pathInput.value) {
             body: JSON.stringify({ relativePath }),
         });
 
-        if(!response.ok) {
+        if (!response.ok) {
             const error = await response.json();
             throw new Error(error.error || '加载失败');
         }
 
         const data = await response.json();
+        if (requestId !== directoryRequestId) return;
         currentPath = data.relativePath || relativePath;
         pathInput.value = currentPath;
+        updateFolderMarkerUI(data.marked);
 
-        if(data.count === 0) {
+        if (data.count === 0) {
             gallery.innerHTML = getEmptyStateHTML();
         } else {
             const imageHTML = data.images.map((img, index) => generateImageCard(img, index)).join('');
@@ -242,8 +288,14 @@ async function loadDirectory(path = pathInput.value) {
         countDisplay.textContent = data.count;
         infoBar.style.display = 'flex';
     } catch (error) {
+        if (requestId !== directoryRequestId) return;
         showStatus(`❌ ${error.message}`, 'error');
         gallery.innerHTML = getErrorStateHTML();
+    } finally {
+        if (requestId === directoryRequestId) {
+            directoryLoading = false;
+            markFolderBtn.disabled = markerSaving || pathBar.style.display === 'none';
+        }
     }
 }
 
@@ -260,6 +312,7 @@ function restorePreviousState() {
 // ==================== 事件绑定 ====================
 loadBtn.addEventListener('click', () => loadDirectory());
 rootBtn.addEventListener('click', () => loadDirectory('.'));
+markFolderBtn.addEventListener('click', toggleFolderMarker);
 pathInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') loadDirectory(); });
 
 // 页面加载时恢复之前的状态

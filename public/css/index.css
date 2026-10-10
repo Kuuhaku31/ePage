@@ -209,6 +209,30 @@ button:disabled {
   background: #f8f9fb;
 }
 
+.folder-item.marked,
+.path-bar.marked,
+#markFolderBtn.marked {
+  background: #e8f5ec;
+  color: #21643a;
+  border: 1px solid #8bc9a0;
+}
+
+.folder-item.marked:hover:not(:disabled) {
+  background: #d8efdf;
+  border-color: #55a873;
+  box-shadow: 0 4px 12px rgba(33, 100, 58, 0.15);
+}
+
+.folder-mark-badge {
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #c8e9d3;
+  color: #21643a;
+  font-size: 12px;
+}
+
 .folder-icon {
   flex: 0 0 auto;
   font-size: 18px;

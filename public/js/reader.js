@@ -150,9 +150,9 @@ function RenderPageNumbers(index_array) {
 function updatePages() {
     let render_index_array = [];
 
-    if(isSinglePageMode) {
+    if (isSinglePageMode) {
         render_index_array = [currentPageIndex];
-    } else if(isRTL) {
+    } else if (isRTL) {
         // 从右向左：右侧是较小页码，左侧是较大页码
         render_index_array = [currentPageIndex + 1, currentPageIndex];
     } else {
@@ -197,7 +197,7 @@ function updateSliderDisplay() {
     }
 
     // 滑块显示当前页码（1-based）
-    if(d_pageSlider) d_pageSlider.value = isRTL ? mangaImages.length - currentPageIndex : currentPageIndex + 1;
+    if (d_pageSlider) d_pageSlider.value = isRTL ? mangaImages.length - currentPageIndex : currentPageIndex + 1;
     // if(sliderLabel) sliderLabel.textContent = displayText;
 }
 
@@ -207,7 +207,7 @@ function updateSliderDisplay() {
 function RenderPageImages(indexArray) {
 
     // 参数检查
-    if(!pagesContainer || !indexArray || indexArray.length === 0) return;
+    if (!pagesContainer || !indexArray || indexArray.length === 0) return;
 
     // 清空当前页面内容
     pagesContainer.innerHTML = '';
@@ -216,13 +216,13 @@ function RenderPageImages(indexArray) {
         if (index < 0 || index >= mangaImages.length) return; // 索引越界检查
 
         const imgElement = document.createElement('img');   // 创建新的 img 元素
-        const imgPath    = mangaImages[index].relativePath; // 获取图片相对路径
-        imgElement.src   = `${ROOT_PATH}${encodePathForUrl(imgPath)}`; // 设置图片源路径
-        imgElement.alt   = `Page ${index + 1}`;             // 设置 alt 属性
+        const imgPath = mangaImages[index].relativePath; // 获取图片相对路径
+        imgElement.src = `${ROOT_PATH}${encodePathForUrl(imgPath)}`; // 设置图片源路径
+        imgElement.alt = `Page ${index + 1}`;             // 设置 alt 属性
         imgElement.classList.add('page-image');             // 添加样式类
 
         // 添加加载状态类，图片加载完成或失败后移除
-        imgElement.onload  = () => { if (pagesContainer) pagesContainer.classList.remove('loading'); };
+        imgElement.onload = () => { if (pagesContainer) pagesContainer.classList.remove('loading'); };
         imgElement.onerror = () => { if (pagesContainer) pagesContainer.classList.remove('loading'); };
 
         // 将 img 元素添加到页面容器尾部
@@ -253,11 +253,11 @@ function updateNavButtonStates() {
 function TurnPage(is_left, distance = null) {
 
     let direction = is_left ? 1 : -1;
-    if(distance === null) distance = isSinglePageMode ? 1 : 2;
+    if (distance === null) distance = isSinglePageMode ? 1 : 2;
 
     currentPageIndex += direction * distance;
-    if(currentPageIndex >= mangaImages.length) currentPageIndex = mangaImages.length - 1;
-    if(currentPageIndex < 0) currentPageIndex = 0;
+    if (currentPageIndex >= mangaImages.length) currentPageIndex = mangaImages.length - 1;
+    if (currentPageIndex < 0) currentPageIndex = 0;
     updatePages();
 }
 
@@ -285,19 +285,75 @@ function goBack() {
 }
 
 // ==================== 全屏功能 ====================
-function toggleFullscreen() {
-    if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(err => {
-            document.body.classList.toggle('fullscreen');
-        });
-    } else {
-        document.exitFullscreen();
+let isFallbackFullscreen = false;
+let fullscreenPending = false;
+
+function getFullscreenElement() {
+    return document.fullscreenElement || document.webkitFullscreenElement;
+}
+
+function updateFullscreenUI() {
+    const active = !!getFullscreenElement() || isFallbackFullscreen;
+    document.body.classList.toggle('fullscreen', active);
+    fullscreenBtn.setAttribute('aria-pressed', String(active));
+    fullscreenBtn.textContent = active ? '⛶ 退出全屏' : '⛶ 全屏';
+}
+
+async function toggleFullscreen() {
+    if (fullscreenPending) return;
+
+    if (isFallbackFullscreen) {
+        isFallbackFullscreen = false;
+        updateFullscreenUI();
+        fullscreenBtn.focus();
+        return;
+    }
+
+    const root = document.documentElement;
+    const nativeFullscreen = !!getFullscreenElement();
+    const requestFullscreen = root.requestFullscreen || root.webkitRequestFullscreen;
+    const exitFullscreen = document.exitFullscreen || document.webkitExitFullscreen;
+    fullscreenPending = true;
+    try {
+        if (nativeFullscreen) {
+            if (exitFullscreen) await exitFullscreen.call(document);
+        } else if (requestFullscreen && document.fullscreenEnabled !== false &&
+            document.webkitFullscreenEnabled !== false) {
+            await requestFullscreen.call(root);
+        } else {
+            // iOS Firefox 等浏览器不支持元素全屏，改用页面内沉浸阅读。
+            isFallbackFullscreen = true;
+        }
+    } catch (err) {
+        // 同步异常和 Promise 拒绝都需要降级，退出失败则保留原生全屏状态。
+        if (!nativeFullscreen) isFallbackFullscreen = true;
+    } finally {
+        fullscreenPending = false;
+        updateFullscreenUI();
     }
 }
 
-document.addEventListener('fullscreenchange', () => {
-    document.body.classList.toggle('fullscreen', !!document.fullscreenElement);
-});
+function handleFullscreenChange() {
+    if (getFullscreenElement()) isFallbackFullscreen = false;
+    updateFullscreenUI();
+}
+
+document.addEventListener('fullscreenchange', handleFullscreenChange);
+document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+
+// 老版本 iOS 没有 dvh；跟随可视视口处理地址栏展开/收起和横竖屏切换。
+function updateViewportHeight() {
+    const viewport = window.visualViewport;
+    if (viewport && viewport.scale !== 1) return;
+    document.documentElement.style.setProperty('--app-height',
+        `${viewport ? viewport.height : window.innerHeight}px`);
+}
+
+updateViewportHeight();
+window.addEventListener('resize', updateViewportHeight);
+if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', updateViewportHeight);
+}
 
 // ==================== 事件绑定 ====================
 function bindEvents() {
@@ -305,6 +361,7 @@ function bindEvents() {
     d_rightBtn.addEventListener('click', () => TurnPage(false));
     backBtn.addEventListener('click', goBack);
     fullscreenBtn.addEventListener('click', toggleFullscreen);
+    document.getElementById('exitFullscreenBtn').addEventListener('click', toggleFullscreen);
     directionBtn.addEventListener('click', toggleReadingMode);
     modeBtn.addEventListener('click', togglePageMode);
 
@@ -344,7 +401,11 @@ function bindEvents() {
                 toggleFullscreen();
                 break;
             case 'escape':
-                goBack();
+                if (getFullscreenElement() || isFallbackFullscreen) {
+                    toggleFullscreen();
+                } else {
+                    goBack();
+                }
                 break;
         }
     });

@@ -1,5 +1,11 @@
 :root {
-  --app-height: 100dvh;
+  --app-height: 100vh;
+}
+
+@supports (height: 100dvh) {
+  :root {
+    --app-height: 100dvh;
+  }
 }
 
 * {
@@ -9,7 +15,8 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   background: #1a1a1a;
   width: 100%;
   height: var(--app-height);
@@ -341,8 +348,10 @@ body {
 /* ==================== 全屏样式 ==================== */
 body.fullscreen {
   position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 100%;
+  height: var(--app-height);
 }
 
 body.fullscreen .header,
@@ -351,7 +360,8 @@ body.fullscreen .footer {
 }
 
 body.fullscreen .reader-wrapper {
-  height: var(--app-height);
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+    env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
 }
 
 body.fullscreen .page-number {
@@ -360,6 +370,27 @@ body.fullscreen .page-number {
 
 body.fullscreen .pages-container {
   padding: 0;
+  height: 100%;
+}
+
+.exit-fullscreen-btn {
+  display: none;
+  position: absolute;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  right: calc(12px + env(safe-area-inset-right, 0px));
+  z-index: 110;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+body.fullscreen .exit-fullscreen-btn {
+  display: block;
 }
 
 /* ==================== 快捷键提示 ==================== */
